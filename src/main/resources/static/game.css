@@ -1,0 +1,39 @@
+body {
+    background-color: gray;
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    width: 480px;
+    aspect-ratio: 1 / 1;
+    border: 2px solid #000;
+}
+
+#moves {
+    background-color: burlywood;
+    width: 300px;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem;
+    align-items: stretch;
+}
+
+.square {
+    aspect-ratio: 1 / 1;
+    box-sizing: border-box;
+    justify-items: center;
+}
+
+.square.light {
+    background-color: lightgreen;
+}
+
+.square.dark {
+    background-color: rgb(95, 167, 95);
+}
