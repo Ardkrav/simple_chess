@@ -2,6 +2,12 @@ body {
     background-color: gray;
 }
 
+div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #board {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
@@ -16,18 +22,50 @@ body {
 }
 
 .container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     gap: 2rem;
     padding: 2rem;
+    position: relative;
     align-items: stretch;
 }
 
+.piece {
+    position: static;
+    user-select: none;
+    -webkit-user-drag: element;
+    width: 100%;
+    height: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: block;
+    background-size: contain;
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.piece.black {
+    color: black;
+}
+
+.piece.white {
+    color: white;
+}
+
+.piece.pawn {
+    background-image: url("/assets/white_pawn.png")
+}
+
 .square {
+    padding: 15%;
     aspect-ratio: 1 / 1;
     box-sizing: border-box;
     justify-items: center;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
 }
 
 .square.light {

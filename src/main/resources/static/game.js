@@ -18,20 +18,65 @@ function setupBoard() {
             board.appendChild(square);
         }
     }
+
+    let squares = document.querySelectorAll(".square");
+    squares.forEach(square => {
+        square.addEventListener("dragover", event => {
+            event.preventDefault();
+        })
+        square.addEventListener("drop", evento => {
+            const id = evento.dataTransfer.getData("id");
+            const piece = document.getElementById(id);
+            if (square.firstElementChild) {
+                square.removeChild(square.firstElementChild);
+            }
+            square.append(piece);
+        })
+    })
 }
 
-function renderBoard(board){
+function renderBoard(board) {
     let columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
     for (let row = 0; row < 8; row++) {
         for (let column = 0; column < 8; column++) {
-            square = document.getElementById(columns[column]+(row+1));
+            pieceCode = board[row][column];
+            if (pieceCode != null) {
+                square = document.getElementById(columns[column] + (row + 1));
 
-            piece = document.createElement("p")
-            piece.innerHTML = board[row][column];
-            square.appendChild(piece);
+                piece = document.createElement("p");
+                piece.draggable = true;
+                piece.classList.add("piece");
+
+                color = pieceCode[0] === 'W' ? "white" : "black";
+                type = {
+                    P: "pawn",
+                    N: "knight",
+                    B: "bishop",
+                    R: "rook",
+                    Q: "queen",
+                    K: "king"
+                }[pieceCode[1]];
+
+                piece.classList.add(color)
+                piece.classList.add(type)
+                
+                piece.id = pieceCode;
+                square.appendChild(piece);
+            }
         }
     }
+
+    let pieces = document.querySelectorAll(".piece");
+    pieces.forEach(piece => {
+        piece.addEventListener("dragstart", event => {
+            piece.classList.add("dragged");
+            event.dataTransfer.setData("id", piece.id);
+        })
+        piece.addEventListener("dragend", event => {
+            piece.classList.remove("dragged");
+        })
+    })
 }
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -39,9 +84,8 @@ const gameId = urlParams.get("id");
 
 async function loadGame(id) {
     const response = await fetch(`/api/game/${id}/board`);
-    const board = await response.json();
-    renderBoard(board);
-    console.log(board);
+    const game = await response.json();
+    renderBoard(game.board);
 }
 
 setupBoard();

@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.springboot.chess.model.Game;
@@ -27,13 +26,13 @@ public class GameController {
     }
 
     @GetMapping("/api/game/{id}/board")
-    public ResponseEntity<String[][]> getGameBoard(@PathVariable int id) {
+    public ResponseEntity<Game> getGameBoard(@PathVariable int id) {
         Optional<Game> og = this.repository.findById(id);
-        ResponseEntity<String[][]> response;
+        ResponseEntity<Game> response;
         if (og.isEmpty()) {
             response = ResponseEntity.badRequest().build();
         } else {
-            response = ResponseEntity.ok(og.get().getBoard());
+            response = ResponseEntity.ok(og.get());
         }
         return response;
     }

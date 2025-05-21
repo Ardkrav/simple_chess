@@ -64,19 +64,19 @@ public class Game {
         board = new String[8][8];
 
         // Fila 0: piezas negras
-        board[7] = new String[] { "BR", "BN", "BB", "BK", "BQ", "BB", "BN", "BR" };
+        board[7] = new String[] { "BRQ", "BNQ", "BBQ", "BQ", "BK", "BBK", "BNK", "BRK" };
 
         // Fila 1: peones negros
         for (int col = 0; col < 8; col++) {
-            board[6][col] = "BP";
+            board[6][col] = "BP"+(col+1);
         }
 
         // Fila 6: peones blancos
         for (int col = 0; col < 8; col++) {
-            board[1][col] = "WP";
+            board[1][col] = "WP"+(col+1);
         }
 
         // Fila 7: piezas blancas
-        board[0] = new String[] { "WR", "WN", "WB", "WK", "WQ", "WB", "WN", "WR" };
+        board[0] = new String[] { "WRQ", "WNQ", "WBQ", "WQ", "WK", "WBK", "WNK", "WRK" };
     }
 }
