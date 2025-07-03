@@ -27,10 +27,15 @@ function setupBoard() {
         square.addEventListener("drop", evento => {
             const id = evento.dataTransfer.getData("id");
             const piece = document.getElementById(id);
-            if (square.firstElementChild) {
-                square.removeChild(square.firstElementChild);
+            if (id != "") {
+                if (square.firstElementChild) {
+                    square.removeChild(square.firstElementChild);
+                }
+                square.append(piece);
             }
-            square.append(piece);
+        })
+        square.addEventListener("contextmenu", event =>{
+            event.preventDefault();
         })
     })
 }
@@ -44,7 +49,7 @@ function renderBoard(board) {
             if (pieceCode != null) {
                 square = document.getElementById(columns[column] + (row + 1));
 
-                piece = document.createElement("p");
+                piece = document.createElement("img");
                 piece.draggable = true;
                 piece.classList.add("piece");
 
@@ -58,9 +63,10 @@ function renderBoard(board) {
                     K: "king"
                 }[pieceCode[1]];
 
+                piece.src = `assets/${color}_${type}.png`;
+
                 piece.classList.add(color)
                 piece.classList.add(type)
-                
                 piece.id = pieceCode;
                 square.appendChild(piece);
             }
@@ -71,10 +77,14 @@ function renderBoard(board) {
     pieces.forEach(piece => {
         piece.addEventListener("dragstart", event => {
             piece.classList.add("dragged");
+            
             event.dataTransfer.setData("id", piece.id);
         })
         piece.addEventListener("dragend", event => {
             piece.classList.remove("dragged");
+        })
+        piece.addEventListener("contextmenu", event =>{
+            event.preventDefault();
         })
     })
 }

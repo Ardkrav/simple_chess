@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.springboot.chess.model.Game;
 import com.springboot.chess.repository.GameRepository;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @RestController
 public class GameController {
@@ -26,7 +29,7 @@ public class GameController {
     }
 
     @GetMapping("/api/game/{id}/board")
-    public ResponseEntity<Game> getGameBoard(@PathVariable int id) {
+    public ResponseEntity<Game> getGameBoard(@PathVariable Integer id) {
         Optional<Game> og = this.repository.findById(id);
         ResponseEntity<Game> response;
         if (og.isEmpty()) {
@@ -44,5 +47,12 @@ public class GameController {
 
         Game savedGame = repository.save(newGame);
         return ResponseEntity.ok(savedGame.getId());
+    }
+
+    @PutMapping("/api/game/{id}")
+    public String putMethodName(@PathVariable Integer id, @RequestBody String entity) {
+        //TODO: process PUT request
+        
+        return entity;
     }
 }
