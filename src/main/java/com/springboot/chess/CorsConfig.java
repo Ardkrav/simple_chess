@@ -11,10 +11,11 @@ public class CorsConfig {
     @Bean
     WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
+            @SuppressWarnings("null")
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://127.0.0.1:5500") // o "*"
+                        .allowedOrigins("http://127.0.0.1:*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*");
             }
