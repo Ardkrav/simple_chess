@@ -1,20 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess</title>
+    <link rel="shortcut icon" href="assets/icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="index.css">
+    <title>Simple Chess</title>
 </head>
 <header>
-    <h1>Chess</h1>
+    <img src="assets/icon.png" alt="Logo"/>
+    <h1>Simple Chess</h1>
 </header>
+
 <body>
     <p>
-        Pagina principal
+        Play chess online with Simple Chess.
     </p>
+    <input type="text" id="nameInput" placeholder="My New Game">
+    <input type="password" id="passInput" placeholder="Password" >
     <button id="start">
         Start new game
     </button>
+    <hr>
+    <h3 class="table-title">Game's list</h3>
+    <table id="games-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Password?</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Acá se insertan las filas con JavaScript -->
+        </tbody>
+    </table>
 </body>
+<footer>
+    Copyright © 2025 Ardkrav
+</footer>
 <script src="index.js"></script>
+
 </html>
