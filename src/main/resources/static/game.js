@@ -1,5 +1,6 @@
 const urlParams = new URLSearchParams(window.location.search);
 const gameId = urlParams.get("id");
+let game = null;
 
 function setupBoard() {
     let board = document.getElementById("board");
@@ -31,14 +32,14 @@ function setupBoard() {
             const id = evento.dataTransfer.getData("id");
             const startPos = evento.dataTransfer.getData("startPos");
 
-            if(await movePiece(startPos, square.id)){
-                if (id) { 
+            if (await movePiece(startPos, square.id)) {
+                if (id) {
                     const piece = document.getElementById(id);
                     square.replaceChildren(piece);
                 }
             }
         })
-        square.addEventListener("contextmenu", event =>{
+        square.addEventListener("contextmenu", event => {
             event.preventDefault();
         })
     })
@@ -61,7 +62,7 @@ function renderBoard(board) {
     pieces.forEach(piece => {
         piece.addEventListener("dragstart", event => {
             piece.classList.add("dragged");
-            
+
             event.dataTransfer.setData("id", piece.id);
             event.dataTransfer.setData("startPos", piece.parentElement.id);
         })
@@ -70,14 +71,25 @@ function renderBoard(board) {
                 piece.classList.remove("dragged");
             }, 100);
         })
-        piece.addEventListener("contextmenu", event =>event.preventDefault())
+        piece.addEventListener("contextmenu", event => event.preventDefault())
     })
 }
 
 async function loadGame(id) {
     const response = await fetch(`/api/game/${id}/board`);
-    const game = await response.json();
+    game = await response.json();
     renderBoard(game.board);
+    renderMovesRecord();
+}
+
+function renderMovesRecord(){
+    let registry = document.getElementById("moves");
+    const movesCounter = document.createElement("p");
+    movesCounter.innerHTML = `Moves: ${game.movesCounter}`;
+    registry.appendChild(movesCounter);
+    registry.appendChild(document.createElement("hr"));
+
+    // Renderizar historial de movimientos
 }
 
 function createPiece(pieceCode) {
@@ -102,14 +114,14 @@ function createPiece(pieceCode) {
     return piece;
 }
 
-async function movePiece(startPosArg, endPosArg){
-    const  data = {
+async function movePiece(startPosArg, endPosArg) {
+    const data = {
         startPos: startPosArg,
         endPos: endPosArg
     }
     console.log("Enviando:", JSON.stringify(data));
 
-    try{
+    try {
         const response = await fetch(`/api/game/${gameId}`, {
             method: "PUT",
             headers: {
@@ -117,19 +129,23 @@ async function movePiece(startPosArg, endPosArg){
             },
             body: JSON.stringify(data)
         })
-        if(!response.ok){
+        if (!response.ok) {
             console.log(response);
             return false;
         }
     }
-    catch (error){
+    catch (error) {
         console.error("Error: ", error);
         return false;
     }
     return true;
 }
 
-const titleElement = document.getElementById("game-title");
-titleElement.textContent = `Game #${gameId}`;
-setupBoard();
-loadGame(gameId);
+async function setup() {
+    setupBoard();
+    await loadGame(gameId); 
+    const titleElement = document.getElementById("game-title");
+    titleElement.textContent = `Game #${gameId} - ${game.name}`;   
+}
+
+setup();
