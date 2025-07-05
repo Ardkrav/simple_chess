@@ -22,7 +22,7 @@ public class Game {
     private String name;
     private String password;
     // private List movesRecord;
-    private int movesCounter;
+    private int movesCounter; // Eliminar y usar movesRecord en su lugar
 
     public Game() {
     }
@@ -104,20 +104,17 @@ public class Game {
         int endRow = Character.getNumericValue(endPos.charAt(1)) - 1;
         String piece = board[startRow][startCol];
 
-        if(piece==null){
+        if (piece == null) {
             return false;
         }
 
         if (startRow < 0 || startRow > 7 || startCol < 0 || startCol > 7 ||
                 endRow < 0 || endRow > 7 || endCol < 0 || endCol > 7) {
-            System.out.println("Posición inválida");
-            System.out.println("startRow: " + startRow + "startCol: " + startCol);
-            System.out.println("endRow: " + endRow + "endCol: " + endCol);
             return false;
         }
 
         if (validateMove(startCol, startRow, endCol, endRow)) {
-            if(piece.charAt(piece.length()-1) == '*'){
+            if (piece.charAt(piece.length() - 1) == '*') {
                 piece = piece.substring(0, piece.length() - 1);
             }
             board[endRow][endCol] = piece;
@@ -132,33 +129,39 @@ public class Game {
         String piece = board[startRow][startCol];
         boolean valid = true;
 
+        if (startCol == endCol && startRow == endRow) {
+            return false;
+        }
+        // Validar que es el turno del jugador que realiza el movimiento
         if (!(piece.charAt(0) == 'W' && this.movesCounter % 2 == 0)
                 && !(piece.charAt(0) == 'B' && this.movesCounter % 2 == 1)) {
             return false;
         }
-        // Validar que es el turno del jugador que realiza el movimiento
+        if (board[endRow][endCol] != null && piece.charAt(0) == board[endRow][endCol].charAt(0)) {
+            return false;
+        }
+
         // Validar que la pieza que se mueve pertenece al jugador
-        if (valid) {
-            switch (piece.charAt(1)) {
-                case 'P':
-                    valid = validatePawnMove(startCol, startRow, endCol, endRow);
-                    break;
-                case 'R':
-                    valid = validateRookMove(startCol, startRow, endCol, endRow);
-                    break;
-                case 'N':
-                    valid = validateKnightMove(startCol, startRow, endCol, endRow);
-                    break;
-                case 'B':
-                    valid = validateBishopMove(startCol, startRow, endCol, endRow);
-                    break;
-                case 'Q':
-                    valid = validateQueenMove(startCol, startRow, endCol, endRow);
-                    break;
-                case 'K':
-                    valid = validateKingMove(startCol, startRow, endCol, endRow);
-                    break;
-            }
+
+        switch (piece.charAt(1)) {
+            case 'P':
+                valid = validatePawnMove(startCol, startRow, endCol, endRow);
+                break;
+            case 'R':
+                valid = validateRookMove(startCol, startRow, endCol, endRow);
+                break;
+            case 'N':
+                valid = validateKnightMove(startCol, startRow, endCol, endRow);
+                break;
+            case 'B':
+                valid = validateBishopMove(startCol, startRow, endCol, endRow);
+                break;
+            case 'Q':
+                valid = validateQueenMove(startCol, startRow, endCol, endRow);
+                break;
+            case 'K':
+                valid = validateKingMove(startCol, startRow, endCol, endRow);
+                break;
         }
 
         return valid;
@@ -168,24 +171,22 @@ public class Game {
         boolean valid = false;
         // Si el peon es blanco moves es par, el peon se puede mover 1 fila arriba.
         // Sino se puede mover una fila abajo.
-        char color = board[startRow][startCol].charAt(0);
         boolean firstMove = false;
         int range = -2 * (this.movesCounter % 2) + 1;
-        if(board[startRow][startCol].length() == 4){
+        if (board[startRow][startCol].length() == 4) {
             firstMove = true;
         }
 
         if (endCol == startCol
-                && (endRow == startRow + range 
-                || (firstMove && endRow == startRow + range*2 
-                && board[startRow+range][startCol] == null))
+                && (endRow == startRow + range
+                        || (firstMove && endRow == startRow + range * 2
+                                && board[startRow + range][startCol] == null))
                 && board[endRow][endCol] == null) {
             valid = true;
         } else if ((endCol == startCol + 1 || endCol == startCol - 1)
                 && endRow == startRow + range
-                && board[endRow][endCol] != null
-                && board[endRow][endCol].charAt(0) != color) {
-            // Falta agregar validacion de on passant
+                && board[endRow][endCol] != null) {
+            // Falta agregar validacion de en passant
             valid = true;
         }
 
@@ -193,23 +194,82 @@ public class Game {
     }
 
     private boolean validateRookMove(int startCol, int startRow, int endCol, int endRow) {
-        return true;
+        int factor;
+        if (startCol > endCol || startRow > endRow) {
+            factor = -1;
+        } else {
+            factor = 1;
+        }
+        if (startCol == endCol || startRow == endRow) {
+            for (int i = startCol; i != endCol; i += factor) {
+                if (i != startCol && board[startRow][i] != null) {
+                    return false;
+                }
+            }
+            for (int i = startRow; i != endRow; i += factor) {
+                if (i != startRow && board[i][startCol] != null) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     private boolean validateKnightMove(int startCol, int startRow, int endCol, int endRow) {
-        return true;
+        if ((Math.abs(startCol - endCol) == 1 && Math.abs(startRow - endRow) == 2)
+                || (Math.abs(startCol - endCol) == 2 && Math.abs(startRow - endRow) == 1)) {
+            return true;
+        }
+        return false;
     }
 
     private boolean validateBishopMove(int startCol, int startRow, int endCol, int endRow) {
+        int colFactor;
+        int rowFactor;
+        int i;
+        int j;
+
+        if(Math.abs(startRow-endRow) != Math.abs(startCol-endCol)){
+            return false;
+        }
+
+        if(startCol<endCol){
+            colFactor = 1;
+        } else {
+            colFactor = -1;
+        }
+        if(startRow<endRow){
+            rowFactor = 1;
+        } else {
+            rowFactor = -1;
+        }
+
+        i = startRow+rowFactor;
+        j = startCol+colFactor;
+
+        while (i!=endRow && j!=endCol) {
+            if(board[i][j]!=null){
+                return false;
+            }
+            i+=rowFactor;
+            j+=colFactor;
+        }
+
         return true;
     }
 
     private boolean validateQueenMove(int startCol, int startRow, int endCol, int endRow) {
-        return true;
+        return validateBishopMove(startCol, startRow, endCol, endRow)
+                || validateRookMove(startCol, startRow, endCol, endRow);
     }
 
     private boolean validateKingMove(int startCol, int startRow, int endCol, int endRow) {
-        return true;
+        // Validar si el movimiento es valido
+        if ((Math.abs(startCol - endCol) <= 1 && Math.abs(startRow - endRow) <= 1)) {
+            return true;
+        }
+        return false;
     }
 
 }
