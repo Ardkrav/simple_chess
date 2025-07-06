@@ -30,6 +30,7 @@ public class Game {
     public Game(String name, String password) {
         this.name = name;
         this.password = password;
+        this.initializeBoard();
     }
 
     public Integer getId() {
@@ -73,7 +74,15 @@ public class Game {
         this.movesCounter = moves;
     }
 
-    public void initializeBoard() {
+    public String getPiece(String algebraic){
+        int[] position = convertPos(algebraic);
+        if(position[0] < 0 || position[0] > 7 || position[1] < 0 || position[1] > 7){
+            return "";
+        }
+        return board[position[0]][position[1]];
+    }
+
+    private void initializeBoard() {
         // this.movesRecord = new LinkedList();
         this.movesCounter = 0;
 
@@ -98,38 +107,39 @@ public class Game {
 
     public boolean movePiece(String startPos, String endPos) {
         boolean moved = false;
-        int startCol = startPos.charAt(0) - 'A';
-        int startRow = Character.getNumericValue(startPos.charAt(1)) - 1;
-        int endCol = endPos.charAt(0) - 'A';
-        int endRow = Character.getNumericValue(endPos.charAt(1)) - 1;
-        String piece = board[startRow][startCol];
+        int[] startIndexes = convertPos(startPos);
+        int[] endIndexes = convertPos(endPos);
+        String piece = board[startIndexes[0]][startIndexes[1]];
 
         if (piece == null) {
             return false;
         }
-
-        if (startRow < 0 || startRow > 7 || startCol < 0 || startCol > 7 ||
-                endRow < 0 || endRow > 7 || endCol < 0 || endCol > 7) {
+        if (startIndexes[0] < 0 || startIndexes[0] > 7 || startIndexes[1] < 0 || startIndexes[1] > 7 ||
+                endIndexes[0] < 0 || endIndexes[0] > 7 || endIndexes[1] < 0 || endIndexes[1] > 7) {
             return false;
         }
-
-        if (validateMove(startCol, startRow, endCol, endRow)) {
+        if (validateMove(startIndexes, endIndexes)) {
             if (piece.charAt(piece.length() - 1) == '*') {
                 piece = piece.substring(0, piece.length() - 1);
             }
-            board[endRow][endCol] = piece;
-            board[startRow][startCol] = null;
+            board[endIndexes[0]][endIndexes[1]] = piece;
+            board[startIndexes[0]][startIndexes[1]] = null;
             movesCounter++;
             moved = true;
         }
         return moved;
     }
 
-    private boolean validateMove(int startCol, int startRow, int endCol, int endRow) {
-        String piece = board[startRow][startCol];
-        boolean valid = true;
+    public static int[] convertPos(String algebraic) {
+        int col = algebraic.charAt(0) - 'A';
+        int row = Character.getNumericValue(algebraic.charAt(1))-1;
+        return new int[]{row, col};
+    }
 
-        if (startCol == endCol && startRow == endRow) {
+    private boolean validateMove(int[] startIndexes, int[] endIndexes) {
+        String piece = board[startIndexes[0]][startIndexes[1]];
+        boolean valid = true;
+        if (startIndexes[1] == endIndexes[1] && startIndexes[0] == endIndexes[0]) {
             return false;
         }
         // Validar que es el turno del jugador que realiza el movimiento
@@ -137,7 +147,7 @@ public class Game {
                 && !(piece.charAt(0) == 'B' && this.movesCounter % 2 == 1)) {
             return false;
         }
-        if (board[endRow][endCol] != null && piece.charAt(0) == board[endRow][endCol].charAt(0)) {
+        if (board[endIndexes[0]][endIndexes[1]] != null && piece.charAt(0) == board[endIndexes[0]][endIndexes[1]].charAt(0)) {
             return false;
         }
 
@@ -145,47 +155,47 @@ public class Game {
 
         switch (piece.charAt(1)) {
             case 'P':
-                valid = validatePawnMove(startCol, startRow, endCol, endRow);
+                valid = validatePawnMove(startIndexes, endIndexes);
                 break;
             case 'R':
-                valid = validateRookMove(startCol, startRow, endCol, endRow);
+                valid = validateRookMove(startIndexes, endIndexes);
                 break;
             case 'N':
-                valid = validateKnightMove(startCol, startRow, endCol, endRow);
+                valid = validateKnightMove(startIndexes, endIndexes);
                 break;
             case 'B':
-                valid = validateBishopMove(startCol, startRow, endCol, endRow);
+                valid = validateBishopMove(startIndexes, endIndexes);
                 break;
             case 'Q':
-                valid = validateQueenMove(startCol, startRow, endCol, endRow);
+                valid = validateQueenMove(startIndexes, endIndexes);
                 break;
             case 'K':
-                valid = validateKingMove(startCol, startRow, endCol, endRow);
+                valid = validateKingMove(startIndexes, endIndexes);
                 break;
         }
 
         return valid;
     }
 
-    private boolean validatePawnMove(int startCol, int startRow, int endCol, int endRow) {
+    private boolean validatePawnMove(int[] startIndexes, int[] endIndexes) {
         boolean valid = false;
         // Si el peon es blanco moves es par, el peon se puede mover 1 fila arriba.
         // Sino se puede mover una fila abajo.
         boolean firstMove = false;
         int range = -2 * (this.movesCounter % 2) + 1;
-        if (board[startRow][startCol].length() == 4) {
+        if (board[startIndexes[0]][startIndexes[1]].length() == 4) {
             firstMove = true;
         }
 
-        if (endCol == startCol
-                && (endRow == startRow + range
-                        || (firstMove && endRow == startRow + range * 2
-                                && board[startRow + range][startCol] == null))
-                && board[endRow][endCol] == null) {
+        if (endIndexes[1] == startIndexes[1]
+                && (endIndexes[0] == startIndexes[0] + range
+                        || (firstMove && endIndexes[0] == startIndexes[0] + range * 2
+                                && board[startIndexes[0] + range][startIndexes[1]] == null))
+                && board[endIndexes[0]][endIndexes[1]] == null) {
             valid = true;
-        } else if ((endCol == startCol + 1 || endCol == startCol - 1)
-                && endRow == startRow + range
-                && board[endRow][endCol] != null) {
+        } else if ((endIndexes[1] == startIndexes[1] + 1 || endIndexes[1] == startIndexes[1] - 1)
+                && endIndexes[0] == startIndexes[0] + range
+                && board[endIndexes[0]][endIndexes[1]] != null) {
             // Falta agregar validacion de en passant
             valid = true;
         }
@@ -193,21 +203,21 @@ public class Game {
         return valid;
     }
 
-    private boolean validateRookMove(int startCol, int startRow, int endCol, int endRow) {
+    private boolean validateRookMove(int[] startIndexes, int[] endIndexes) {
         int factor;
-        if (startCol > endCol || startRow > endRow) {
+        if (startIndexes[1] > endIndexes[1] || startIndexes[0] > endIndexes[0]) {
             factor = -1;
         } else {
             factor = 1;
         }
-        if (startCol == endCol || startRow == endRow) {
-            for (int i = startCol; i != endCol; i += factor) {
-                if (i != startCol && board[startRow][i] != null) {
+        if (startIndexes[1] == endIndexes[1] || startIndexes[0] == endIndexes[0]) {
+            for (int i = startIndexes[1]; i != endIndexes[1]; i += factor) {
+                if (i != startIndexes[1] && board[startIndexes[0]][i] != null) {
                     return false;
                 }
             }
-            for (int i = startRow; i != endRow; i += factor) {
-                if (i != startRow && board[i][startCol] != null) {
+            for (int i = startIndexes[0]; i != endIndexes[0]; i += factor) {
+                if (i != startIndexes[0] && board[i][startIndexes[1]] != null) {
                     return false;
                 }
             }
@@ -216,39 +226,39 @@ public class Game {
         return false;
     }
 
-    private boolean validateKnightMove(int startCol, int startRow, int endCol, int endRow) {
-        if ((Math.abs(startCol - endCol) == 1 && Math.abs(startRow - endRow) == 2)
-                || (Math.abs(startCol - endCol) == 2 && Math.abs(startRow - endRow) == 1)) {
+    private boolean validateKnightMove(int[] startIndexes, int[] endIndexes) {
+        if ((Math.abs(startIndexes[1] - endIndexes[1]) == 1 && Math.abs(startIndexes[0] - endIndexes[0]) == 2)
+                || (Math.abs(startIndexes[1] - endIndexes[1]) == 2 && Math.abs(startIndexes[0] - endIndexes[0]) == 1)) {
             return true;
         }
         return false;
     }
 
-    private boolean validateBishopMove(int startCol, int startRow, int endCol, int endRow) {
+    private boolean validateBishopMove(int[] startIndexes, int[] endIndexes) {
         int colFactor;
         int rowFactor;
         int i;
         int j;
 
-        if(Math.abs(startRow-endRow) != Math.abs(startCol-endCol)){
+        if(Math.abs(startIndexes[0]-endIndexes[0]) != Math.abs(startIndexes[1]-endIndexes[1])){
             return false;
         }
 
-        if(startCol<endCol){
+        if(startIndexes[1]<endIndexes[1]){
             colFactor = 1;
         } else {
             colFactor = -1;
         }
-        if(startRow<endRow){
+        if(startIndexes[0]<endIndexes[0]){
             rowFactor = 1;
         } else {
             rowFactor = -1;
         }
 
-        i = startRow+rowFactor;
-        j = startCol+colFactor;
+        i = startIndexes[0]+rowFactor;
+        j = startIndexes[1]+colFactor;
 
-        while (i!=endRow && j!=endCol) {
+        while (i!=endIndexes[0] && j!=endIndexes[1]) {
             if(board[i][j]!=null){
                 return false;
             }
@@ -259,14 +269,14 @@ public class Game {
         return true;
     }
 
-    private boolean validateQueenMove(int startCol, int startRow, int endCol, int endRow) {
-        return validateBishopMove(startCol, startRow, endCol, endRow)
-                || validateRookMove(startCol, startRow, endCol, endRow);
+    private boolean validateQueenMove(int[] startIndexes, int[] endIndexes) {
+        return validateBishopMove(startIndexes, endIndexes)
+                || validateRookMove(startIndexes, endIndexes);
     }
 
-    private boolean validateKingMove(int startCol, int startRow, int endCol, int endRow) {
+    private boolean validateKingMove(int[] startIndexes, int[] endIndexes) {
         // Validar si el movimiento es valido
-        if ((Math.abs(startCol - endCol) <= 1 && Math.abs(startRow - endRow) <= 1)) {
+        if ((Math.abs(startIndexes[1] - endIndexes[1]) <= 1 && Math.abs(startIndexes[0] - endIndexes[0]) <= 1)) {
             return true;
         }
         return false;
