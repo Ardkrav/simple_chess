@@ -31,11 +31,11 @@ public class GameController {
     }
 
     @GetMapping("/api/game/{id}/board")
-    public ResponseEntity<Game> getGameBoard(@PathVariable Integer id) {
+    public ResponseEntity<?> getGameBoard(@PathVariable Integer id) {
         Optional<Game> og = this.repository.findById(id);
-        ResponseEntity<Game> response;
+        ResponseEntity<?> response;
         if (og.isEmpty()) {
-            response = ResponseEntity.badRequest().build();
+            response = ResponseEntity.badRequest().body("Game does not exist");
         } else {
             response = ResponseEntity.ok(og.get());
         }
@@ -45,7 +45,6 @@ public class GameController {
     @PostMapping("/api/games")
     public ResponseEntity<Integer> startGame(@RequestBody Map<String, String> data) {
         Game newGame = new Game(data.get("name"), data.get("password"));
-        newGame.initializeBoard(); 
 
         Game savedGame = repository.save(newGame);
         return ResponseEntity.ok(savedGame.getId());
@@ -58,12 +57,12 @@ public class GameController {
         String endPos = move.get("endPos");
 
         if (startPos == null || endPos == null) {
-            return ResponseEntity.badRequest().body("Faltan parámetros startPos o endPos");
+            return ResponseEntity.badRequest().body("Missing arguments startPos or endPos");
         }
 
         Optional<Game> og = this.repository.findById(id);
         if (og.isEmpty()) {
-            response = ResponseEntity.badRequest().build();
+            response = ResponseEntity.badRequest().body("Game does not exist");
             return response;
         } 
         if (og.get().movePiece(startPos, endPos)) {
@@ -71,8 +70,9 @@ public class GameController {
             repository.save(og.get());
         }
         else{
-            response = ResponseEntity.badRequest().body("Movimiento inválido");
+            response = ResponseEntity.badRequest().body("Invalid move");
         }
+
         return response;
     }
 
@@ -81,7 +81,7 @@ public class GameController {
         ResponseEntity<String> response;
         Optional<Game> og = this.repository.findById(id);
         if(og.isEmpty()){
-            response = ResponseEntity.badRequest().build();
+            response = ResponseEntity.badRequest().body("Game does not exist");
         } else {
             this.repository.deleteById(id);  
             response = ResponseEntity.ok().build();
