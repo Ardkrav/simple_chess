@@ -1,0 +1,25 @@
+name: Tarea Técnica
+description: Refactor, optimización o tareas internas
+labels: [refactor, tech-debt]
+body:
+  - type: input
+    id: objetivo
+    attributes:
+      label: Objetivo
+      placeholder: "Refactorizar clase GameService"
+
+  - type: textarea
+    id: detalle
+    attributes:
+      label: Detalles
+      description: Explicá qué y por qué hay que cambiar algo
+
+  - type: checkboxes
+    id: impacto
+    attributes:
+      label: Áreas afectadas
+      options:
+        - label: Rendimiento
+        - label: Lectura del código
+        - label: Organización de carpetas
+        - label: Seguridad
