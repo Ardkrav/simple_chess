@@ -15,7 +15,7 @@ public class RookMovementTest {
         game = new Game("Partida1", "secreta123");
     }
 
-    private void colocarTorre(String pos, String color) {
+    private void placeRook(String pos, String color) {
         String[][] board = new String[8][8];
         int[] position = Game.convertPos(pos);
         board[position[0]][position[1]] = color.equals("W") ? "WRK*" : "BRK*";
@@ -24,39 +24,39 @@ public class RookMovementTest {
     }
 
     @Test
-    void testMoverTorreArribaSinObstaculos() {
-        colocarTorre("D4", "W");
+    void testMoveRookUpWithoutObstacle() {
+        placeRook("D4", "W");
         boolean result = game.movePiece("D4", "D1");
         assertTrue(result);
         assertEquals("WRK", game.getPiece("D1"));
     }
 
     @Test
-    void testMoverTorreAbajoSinObstaculos() {
-        colocarTorre("D4", "W");
+    void testMoveRookDownWithoutObstacle() {
+        placeRook("D4", "W");
         boolean result = game.movePiece("D4", "D8");
         assertTrue(result);
         assertEquals("WRK", game.getPiece("D8"));
     }
 
     @Test
-    void testMoverTorreIzquierdaSinObstaculos() {
-        colocarTorre("D4", "W");
+    void testMoveRookLeftWithoutObstacle() {
+        placeRook("D4", "W");
         boolean result = game.movePiece("D4", "A4");
         assertTrue(result);
         assertEquals("WRK", game.getPiece("A4"));
     }
 
     @Test
-    void testMoverTorreDerechaSinObstaculos() {
-        colocarTorre("D4", "W");
+    void testMoveRookRightWithoutObstacle() {
+        placeRook("D4", "W");
         boolean result = game.movePiece("D4", "H4");
         assertTrue(result);
         assertEquals("WRK", game.getPiece("H4"));
     }
 
     @Test
-    void testTorreNoPuedeAtravesarAliado() {
+    void testMoveRookWithAllyObstacle() {
         String[][] board = new String[8][8];
         board[3][3] = "WRK*";
         board[1][3] = "WP5";
@@ -68,7 +68,7 @@ public class RookMovementTest {
     }
 
     @Test
-    void testTorreNoPuedeAtravesarEnemigo() {
+    void testMoveRookWithEnemyObstacle() {
         String[][] board = new String[8][8];
         board[3][3] = "WRK*";
         board[1][3] = "BP3";
@@ -80,7 +80,7 @@ public class RookMovementTest {
     }
 
     @Test
-    void testTorreCapturaEnemigoFinal() {
+    void testRookCapture() {
         String[][] board = new String[8][8];
         board[4][3] = "WRK*";
         board[7][3] = "BP3"; 
