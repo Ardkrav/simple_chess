@@ -66,6 +66,7 @@ public class Game {
      * this.movesRecord = movesRecord;
      * }
      */
+
     public int getMovesCounter() {
         return movesCounter;
     }
@@ -74,12 +75,34 @@ public class Game {
         this.movesCounter = moves;
     }
 
-    public String getPiece(String algebraic){
-        int[] position = convertPos(algebraic);
-        if(position[0] < 0 || position[0] > 7 || position[1] < 0 || position[1] > 7){
+    public String getPiece(String algebraicPos) {
+        int[] positionIndexes = convertPos(algebraicPos);
+        if (!validatePos(algebraicPos)) {
             return "";
         }
-        return board[position[0]][position[1]];
+        return board[positionIndexes[0]][positionIndexes[1]];
+    }
+
+    public boolean setPiece(String algebraicPos, String piece){
+        int[] positionIndexes;
+        if (!validatePos(algebraicPos)) return false;
+        positionIndexes = convertPos(algebraicPos);
+        board[positionIndexes[0]][positionIndexes[1]] = piece;
+
+        return true;
+    }
+
+    public static int[] convertPos(String algebraicPos) {
+        int col = algebraicPos.charAt(0) - 'A';
+        int row = Character.getNumericValue(algebraicPos.charAt(1)) - 1;
+        return new int[] { row, col };
+    }
+
+    public static boolean validatePos(String algebraicPos){
+        int[] indexes = convertPos(algebraicPos);
+        if(indexes[0] < 0 || indexes[0]>7 || indexes[1] < 0 || indexes[1]>7) return false;
+    
+        return true;
     }
 
     private void initializeBoard() {
@@ -107,51 +130,52 @@ public class Game {
 
     public boolean movePiece(String startPos, String endPos) {
         boolean moved = false;
-        int[] startIndexes = convertPos(startPos);
-        int[] endIndexes = convertPos(endPos);
-        String piece = board[startIndexes[0]][startIndexes[1]];
+        String piece;
+
+        if (!validatePos(startPos) || !validatePos(endPos)) {
+            return false;
+        }
+
+        piece = this.getPiece(startPos);
 
         if (piece == null) {
             return false;
         }
-        if (startIndexes[0] < 0 || startIndexes[0] > 7 || startIndexes[1] < 0 || startIndexes[1] > 7 ||
-                endIndexes[0] < 0 || endIndexes[0] > 7 || endIndexes[1] < 0 || endIndexes[1] > 7) {
-            return false;
-        }
-        if (validateMove(startIndexes, endIndexes)) {
+
+        if (validateMove(startPos, endPos)) {
             if (piece.charAt(piece.length() - 1) == '*') {
                 piece = piece.substring(0, piece.length() - 1);
             }
-            board[endIndexes[0]][endIndexes[1]] = piece;
-            board[startIndexes[0]][startIndexes[1]] = null;
+            this.setPiece(endPos, piece);
+            this.setPiece(startPos, null);
             movesCounter++;
             moved = true;
         }
         return moved;
     }
 
-    public static int[] convertPos(String algebraic) {
-        int col = algebraic.charAt(0) - 'A';
-        int row = Character.getNumericValue(algebraic.charAt(1))-1;
-        return new int[]{row, col};
-    }
-
-    private boolean validateMove(int[] startIndexes, int[] endIndexes) {
-        String piece = board[startIndexes[0]][startIndexes[1]];
+    private boolean validateMove(String startPos, String endPos) {
+        String piece = this.getPiece(startPos);
         boolean valid = true;
-        if (startIndexes[1] == endIndexes[1] && startIndexes[0] == endIndexes[0]) {
+        int[] startIndexes;
+        int[] endIndexes;
+
+        if (startPos.equals(endPos)) {
             return false;
         }
         // Validar que es el turno del jugador que realiza el movimiento
-        if (!(piece.charAt(0) == 'W' && this.movesCounter % 2 == 0)
-                && !(piece.charAt(0) == 'B' && this.movesCounter % 2 == 1)) {
+        char[] turn = { 'W', 'B' };
+        if (piece.charAt(0) != turn[this.movesCounter % 2]) {
             return false;
         }
-        if (board[endIndexes[0]][endIndexes[1]] != null && piece.charAt(0) == board[endIndexes[0]][endIndexes[1]].charAt(0)) {
+        if (this.getPiece(endPos) != null
+                && piece.charAt(0) == this.getPiece(endPos).charAt(0)) {
             return false;
         }
 
         // Validar que la pieza que se mueve pertenece al jugador
+        startIndexes  = convertPos(startPos);
+        endIndexes  = convertPos(endPos);
 
         switch (piece.charAt(1)) {
             case 'P':
@@ -240,30 +264,30 @@ public class Game {
         int i;
         int j;
 
-        if(Math.abs(startIndexes[0]-endIndexes[0]) != Math.abs(startIndexes[1]-endIndexes[1])){
+        if (Math.abs(startIndexes[0] - endIndexes[0]) != Math.abs(startIndexes[1] - endIndexes[1])) {
             return false;
         }
 
-        if(startIndexes[1]<endIndexes[1]){
+        if (startIndexes[1] < endIndexes[1]) {
             colFactor = 1;
         } else {
             colFactor = -1;
         }
-        if(startIndexes[0]<endIndexes[0]){
+        if (startIndexes[0] < endIndexes[0]) {
             rowFactor = 1;
         } else {
             rowFactor = -1;
         }
 
-        i = startIndexes[0]+rowFactor;
-        j = startIndexes[1]+colFactor;
+        i = startIndexes[0] + rowFactor;
+        j = startIndexes[1] + colFactor;
 
-        while (i!=endIndexes[0] && j!=endIndexes[1]) {
-            if(board[i][j]!=null){
+        while (i != endIndexes[0] && j != endIndexes[1]) {
+            if (board[i][j] != null) {
                 return false;
             }
-            i+=rowFactor;
-            j+=colFactor;
+            i += rowFactor;
+            j += colFactor;
         }
 
         return true;
