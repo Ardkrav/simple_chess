@@ -52,14 +52,12 @@ public class KingMovementTest {
 
     @Test
     void testInvalidKingMoves() {
-        placeKing("D4", "W");
-
         // Movimientos inválidos: más de una casilla
         String[] invalidos = {"D6", "F4", "B4", "A1", "F6", "D1", "D4"};
 
         for (String destino : invalidos) {
             setUp();
-            placeKing("D4", "W");
+            game.setPiece("D4", "WK");
             assertFalse(game.movePiece("D4", destino), "No debe poder moverse a " + destino);
         }
     }
@@ -103,31 +101,61 @@ public class KingMovementTest {
     }
 
     @Test
-    void testKingSideCastling() {
-        // Rey blanco en E1, torre blanca en H1, sin piezas entre medio
+    void testWhiteKingSideCastling() {
         String[][] board = new String[8][8];
-        board[0][4] = "WK*";  // E1
-        board[0][7] = "WRK*"; // H1
         game.setBoard(board);
+        game.setPiece("E1", "WK*");
+        game.setPiece("H1", "WRK*");
 
-        boolean result = game.movePiece("E1", "G1"); // Enroque corto
+        boolean result = game.movePiece("E1", "G1");
         assertTrue(result);
         assertEquals("WK", game.getPiece("G1"));
-        assertEquals("WRK", game.getPiece("F1")); // Torre se mueve a F1
+        assertEquals("WRK", game.getPiece("F1"));
+        assertEquals(null, game.getPiece("H1"));
     }
 
     @Test
-    void testQueenSideCastling() {
-        // Rey blanco en E1, torre blanca en A1, sin piezas entre medio
+    void testWhiteQueenSideCastling() {
         String[][] board = new String[8][8];
-        board[0][4] = "WK*";  // E1
-        board[0][0] = "WRK*"; // A1
         game.setBoard(board);
+        game.setPiece("E1", "WK*");
+        game.setPiece("A1", "WRQ*");
 
-        boolean result = game.movePiece("E1", "C1"); // Enroque largo
+        boolean result = game.movePiece("E1", "C1");
         assertTrue(result);
         assertEquals("WK", game.getPiece("C1"));
-        assertEquals("WRK", game.getPiece("D1")); // Torre se mueve a D1
+        assertEquals("WRQ", game.getPiece("D1"));
+        assertEquals(null, game.getPiece("A1"));
+    }
+
+    @Test
+    void testBlackKingSideCastling() {
+        String[][] board = new String[8][8];
+        game.setMovesCounter(1);
+        game.setBoard(board);
+        game.setPiece("E8", "BK*");
+        game.setPiece("H8", "BRK*");
+
+        boolean result = game.movePiece("E8", "G8");
+        assertTrue(result);
+        assertEquals("BK", game.getPiece("G8"));
+        assertEquals("BRK", game.getPiece("F8"));
+        assertEquals(null, game.getPiece("H8"));
+    }
+
+    @Test
+    void testBlackQueenSideCastling() {
+        String[][] board = new String[8][8];
+        game.setMovesCounter(1);
+        game.setBoard(board);
+        game.setPiece("E8", "BK*");
+        game.setPiece("A8", "BRQ*");
+
+        boolean result = game.movePiece("E8", "C8");
+        assertTrue(result);
+        assertEquals("BK", game.getPiece("C8"));
+        assertEquals("BRQ", game.getPiece("D8"));
+        assertEquals(null, game.getPiece("A8"));
     }
 
     @Test
@@ -147,6 +175,8 @@ public class KingMovementTest {
         board[0][4] = "WK*";   // E1
         board[0][7] = "WRK";   // H1 sin asterisco, ya se movió
         game.setBoard(board);
+        game.setPiece("E1", "WK*");
+        game.setPiece("H1", "WRK");
 
         boolean result = game.movePiece("E1", "G1");
         assertFalse(result, "No debe enrocar si la torre ya se movió");
