@@ -1,5 +1,6 @@
 package com.springboot.chess.model;
 
+import java.io.Console;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -83,9 +84,10 @@ public class Game {
         return board[positionIndexes[0]][positionIndexes[1]];
     }
 
-    public boolean setPiece(String algebraicPos, String piece){
+    public boolean setPiece(String algebraicPos, String piece) {
         int[] positionIndexes;
-        if (!validatePos(algebraicPos)) return false;
+        if (!validatePos(algebraicPos))
+            return false;
         positionIndexes = convertPos(algebraicPos);
         board[positionIndexes[0]][positionIndexes[1]] = piece;
 
@@ -98,10 +100,11 @@ public class Game {
         return new int[] { row, col };
     }
 
-    public static boolean validatePos(String algebraicPos){
+    public static boolean validatePos(String algebraicPos) {
         int[] indexes = convertPos(algebraicPos);
-        if(indexes[0] < 0 || indexes[0]>7 || indexes[1] < 0 || indexes[1]>7) return false;
-    
+        if (indexes[0] < 0 || indexes[0] > 7 || indexes[1] < 0 || indexes[1] > 7)
+            return false;
+
         return true;
     }
 
@@ -131,6 +134,7 @@ public class Game {
     public boolean movePiece(String startPos, String endPos) {
         boolean moved = false;
         String piece;
+        String auxPiece = null;
 
         if (!validatePos(startPos) || !validatePos(endPos)) {
             return false;
@@ -146,8 +150,14 @@ public class Game {
             if (piece.charAt(piece.length() - 1) == '*') {
                 piece = piece.substring(0, piece.length() - 1);
             }
+            
+            // Si muevo peon a borde del tablero, promociona
+            if(piece.charAt(1) == 'P' && (endPos.contains("8") || endPos.contains("1"))){
+                piece = piece.replace('P', 'Q');
+            }
+
             this.setPiece(endPos, piece);
-            this.setPiece(startPos, null);
+            this.setPiece(startPos, auxPiece);
             movesCounter++;
             moved = true;
         }
@@ -174,8 +184,8 @@ public class Game {
         }
 
         // Validar que la pieza que se mueve pertenece al jugador
-        startIndexes  = convertPos(startPos);
-        endIndexes  = convertPos(endPos);
+        startIndexes = convertPos(startPos);
+        endIndexes = convertPos(endPos);
 
         switch (piece.charAt(1)) {
             case 'P':
@@ -303,6 +313,27 @@ public class Game {
         if ((Math.abs(startIndexes[1] - endIndexes[1]) <= 1 && Math.abs(startIndexes[0] - endIndexes[0]) <= 1)) {
             return true;
         }
+        
+        // Comprobar enroque
+        if ((Math.abs(startIndexes[1] - endIndexes[1]) == 2 && Math.abs(startIndexes[0] - endIndexes[0]) == 0)
+            && board[startIndexes[0]][startIndexes[1]].contains("*")) {
+            
+            if(endIndexes[1] == 2){
+                String rook = board[startIndexes[0]][0];
+                if (!rook.contains("*")) return false;
+                board[startIndexes[0]][3] = rook.substring(0, rook.length() - 1);
+                board[startIndexes[0]][0] = null;
+            }
+            else{
+                String rook = board[startIndexes[0]][7];
+                if (!rook.contains("*")) return false;
+                board[startIndexes[0]][5] = rook.substring(0, rook.length() - 1);
+                board[startIndexes[0]][7] = null;
+            }
+
+            return true;
+        }
+
         return false;
     }
 
